@@ -79,6 +79,8 @@
     </Publisher>
     <RootComponents>
       <RootComponent type="1" schemaName="almgithu_timerequest" behavior="0" />
+      <RootComponent type="61" schemaName="tcofgp_AGGridCSS" behavior="0" />
+      <RootComponent type="61" schemaName="tcofgp_index" behavior="0" />
       <RootComponent type="62" schemaName="almgithu_TimeRequests" behavior="0" />
       <RootComponent type="80" schemaName="almgithu_TimeRequests" behavior="0" />
     </RootComponents>
