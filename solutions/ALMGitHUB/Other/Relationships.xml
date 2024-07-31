@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<EntityRelationships xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <EntityRelationship Name="business_unit_almgithu_timerequest" />
+  <EntityRelationship Name="lk_almgithu_timerequest_createdby" />
+  <EntityRelationship Name="lk_almgithu_timerequest_modifiedby" />
+  <EntityRelationship Name="owner_almgithu_timerequest" />
+  <EntityRelationship Name="team_almgithu_timerequest" />
+  <EntityRelationship Name="user_almgithu_timerequest" />
+</EntityRelationships>
