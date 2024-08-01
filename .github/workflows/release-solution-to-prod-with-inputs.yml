@@ -76,7 +76,8 @@ jobs:
         client-secret: ${{ secrets.envSecret }}
         tenant-id: ${{inputs.TENANT_ID}}
         solution-file: ${{ inputs.solution_outbound_folder}}/${{ inputs.solution_name }}.zip
-        force-overwrite: true
+         convert-to-managed: true
+        #force-overwrite: true
         publish-changes: true
 
     - name: Export solution as managed
