@@ -14,7 +14,7 @@ jobs:
       #You can specify the solution name here
       solution_name: ALMGitHUB
       #Update your values here
-      BUILD_ENVIRONMENT_URL: 'https://tco-validation.api.crm4.dynamics.com'
+      BUILD_ENVIRONMENT_URL: 'https://org5806c7ac.api.crm4.dynamics.com'
       PRODUCTION_ENVIRONMENT_URL: 'https://org89118523.api.crm4.dynamics.com'
       CLIENT_ID: '1af267f9-3dd0-4cec-8f94-574a5ae46f4a'
       TENANT_ID: 'fd799da1-bfc1-4234-a91c-72b3a1cb9e26'      
