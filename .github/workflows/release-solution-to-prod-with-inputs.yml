@@ -1,47 +1,42 @@
 name: release-solution-to-prod-reusable
-# Reusable workflow
-# convert solution to managed (using a build PowerPlatform environment for the conversion)
-# upload the solution to the GitHub artifacts and deploy to the PROD environment
+
 on:
   workflow_call:
     inputs: 
-      #Do Not change these values
-      #Values are set by the caller
-      #caller sample: release-action-call.ymnl
       solution_name:
         description: 'The solution name.'
         type: string
-        default: ALMGitHUB       
+        default: ALMLab       
       solution_shipping_folder:
-        description: 'folder name for staging the exported solution *do not change*'        
+        description: 'Folder name for staging the exported solution *do not change*'        
         type: string
         default: out/ship/
       solution_outbound_folder:
-        description: 'staging the unpacked solution folder before check-in *do not change*'
+        description: 'Staging the unpacked solution folder before check-in *do not change*'
         type: string
         default: out/solutions/
       solution_source_folder: 
-       description: 'folder name to be created and checked in *do not change*'
-       type: string
-       default: solutions/
+        description: 'Folder name to be created and checked in *do not change*'
+        type: string
+        default: solutions/
       solution_release_folder:
-       description: 'folder where the released binaries are going to be hosted *do not change*'
-       type: string
-       default: out/release
+        description: 'Folder where the released binaries are going to be hosted *do not change*'
+        type: string
+        default: out/release
       BUILD_ENVIRONMENT_URL:
-        description: 'Build environment url.'
+        description: 'Build environment URL.'
         type: string
         required: true      
       PRODUCTION_ENVIRONMENT_URL: 
-        description: 'Production environment url.'
+        description: 'Production environment URL.'
         type: string
         required: true
       CLIENT_ID: 
-        description: 'The client id'
+        description: 'The client ID'
         type: string
         required: true
       TENANT_ID: 
-        description: 'The tenant id'
+        description: 'The tenant ID'
         type: string
         required: true
     secrets:
@@ -52,7 +47,6 @@ on:
 jobs:
   convert-to-managed:
     runs-on: windows-latest
-    # or you can say runs-on: ubuntu-latest
     env:
       RUNNER_DEBUG: 1
 
@@ -68,7 +62,7 @@ jobs:
         solution-file: ${{ inputs.solution_outbound_folder}}/${{ inputs.solution_name }}.zip
         solution-type: Managed
 
-    - name: Import solution as unmanaged to build env
+    - name: Import solution as managed to build env
       uses: microsoft/powerplatform-actions/import-solution@v0
       with:
         environment-url: ${{inputs.BUILD_ENVIRONMENT_URL}}
@@ -96,7 +90,7 @@ jobs:
         name: managedSolutions
         path: ${{ inputs.solution_shipping_folder}}/
 
-  release-to-staging:
+  release-to-prod:
     needs: [ convert-to-managed ]
     runs-on: windows-latest
     env:
@@ -112,6 +106,7 @@ jobs:
       with:
         name: managedSolutions
         path: ${{ inputs.solution_release_folder}}
+
     - name: Import solution to prod env
       uses: microsoft/powerplatform-actions/import-solution@v0
       with:
