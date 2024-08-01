@@ -1,4 +1,4 @@
-name: release-solution-to-build
+name: release-solution-to-build-and-prod
 
 on:
   workflow_call:
@@ -25,6 +25,10 @@ on:
         default: out/release
       BUILD_ENVIRONMENT_URL:
         description: 'Build environment URL.'
+        type: string
+        required: true      
+      PRODUCTION_ENVIRONMENT_URL: 
+        description: 'Production environment URL.'
         type: string
         required: true
       CLIENT_ID: 
@@ -74,3 +78,37 @@ jobs:
       with:
         name: managedSolutions
         path: ${{ inputs.solution_shipping_folder}}/
+
+  release-to-prod:
+    needs: [ pack-and-deploy ]
+    runs-on: windows-latest
+    env:
+      RUNNER_DEBUG: 1
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        lfs: true
+
+    - name: Fetch the ready to ship solution from GH artifact store
+      uses: actions/download-artifact@v2
+      with:
+        name: managedSolutions
+        path: ${{ inputs.solution_release_folder}}
+
+    - name: Get approval before deploying to production
+      uses: codacy/code-quality-action@v1.2.0
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Import solution to prod env
+      if: success()
+      uses: microsoft/powerplatform-actions/import-solution@v0
+      with:
+        environment-url: ${{inputs.PRODUCTION_ENVIRONMENT_URL}}
+        app-id: ${{inputs.CLIENT_ID}}
+        client-secret: ${{ secrets.envSecret }}
+        tenant-id: ${{inputs.TENANT_ID}}
+        solution-file: ${{ inputs.solution_release_folder}}/${{ inputs.solution_name }}_managed.zip
+        force-overwrite: true
+        publish-changes: true
