@@ -20,7 +20,7 @@ on:
 
         required: true
 
-        default:  <SolutionName>
+        default:  ALMGitHUB
 
        #Do Not change these values
 
