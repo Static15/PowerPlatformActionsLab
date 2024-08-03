@@ -82,37 +82,27 @@ jobs:
         overwrite-files: true
 
     - name: Branch and commit unmanaged solution
+      uses: actions/checkout@v2
+      with:
+        lfs: true
+
+    - name: Commit unmanaged solution
       run: |
         git config --global user.name 'github-actions'
         git config --global user.email 'github-actions@github.com'
-        git checkout -b add-unmanaged-solution-${{ github.event.inputs.solution_name }}
-        git add ${{ github.event.inputs.solution_folder }}/${{ github.event.inputs.solution_name }}
+        git add ${{ github.event.inputs.solution_folder }}/
         git commit -m "Add unmanaged solution ${{ github.event.inputs.solution_name }}"
-        git push origin add-unmanaged-solution-${{ github.event.inputs.solution_name }}
-
-    - name: Create pull request for unmanaged solution
-      uses: peter-evans/create-pull-request@v4
-      with:
-        token: ${{ secrets.PAT_TOKEN }}
-        branch: add-unmanaged-solution-${{ github.event.inputs.solution_name }}
-        base: main
-        title: "Add unmanaged solution ${{ github.event.inputs.solution_name }}"
-        body: "This PR adds the unmanaged solution ${{ github.event.inputs.solution_name }}"
+        git push origin HEAD:main
 
     - name: Branch and commit managed solution
+      uses: actions/checkout@v2
+      with:
+        lfs: true
+
+    - name: Commit managed solution
       run: |
         git config --global user.name 'github-actions'
         git config --global user.email 'github-actions@github.com'
-        git checkout -b add-managed-solution-${{ github.event.inputs.solution_name }}
         git add ${{ github.event.inputs.solution_exported_folder }}/${{ github.event.inputs.solution_name }}_managed.zip
         git commit -m "Add managed solution ${{ github.event.inputs.solution_name }}"
-        git push origin add-managed-solution-${{ github.event.inputs.solution_name }}
-
-    - name: Create pull request for managed solution
-      uses: peter-evans/create-pull-request@v4
-      with:
-        token: ${{ secrets.PAT_TOKEN }}
-        branch: add-managed-solution-${{ github.event.inputs.solution_name }}
-        base: main
-        title: "Add managed solution ${{ github.event.inputs.solution_name }}"
-        body: "This PR adds the managed solution ${{ github.event.inputs.solution_name }}"
+        git push origin HEAD:main
