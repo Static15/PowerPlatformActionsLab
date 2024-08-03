@@ -3,10 +3,12 @@ name: export-and-branch-solution
 on:
   workflow_dispatch:
     inputs:
+      # Change this value
       solution_name:
         description: 'Name of the solution to work on from Power Platform'
         required: true
         default: ALMGitHUB
+      # Do not change these values
       solution_exported_folder:
         description: 'Folder name for staging the exported solution *do not change*'
         required: true
@@ -21,14 +23,18 @@ on:
         default: solutions/
 
 env:
+  # Edit your values here
   ENVIRONMENT_URL: 'https://org31cddccd.api.crm4.dynamics.com'
   CLIENT_ID: '1af267f9-3dd0-4cec-8f94-574a5ae46f4a'
   TENANT_ID: 'fd799da1-bfc1-4234-a91c-72b3a1cb9e26'
 
+permissions:
+  contents: write
+
 jobs:
   export-from-dev:
     runs-on: windows-latest
-
+    # Or you can say runs-on: ubuntu-latest
     env:
       RUNNER_DEBUG: 1
 
@@ -37,17 +43,15 @@ jobs:
       with:
         lfs: true
 
-    - name: Export solution (unmanaged)
-      uses: microsoft/powerplatform-actions/export-solution@v0
+    - name: Who-am-I action
+      uses: microsoft/powerplatform-actions/who-am-i@v0
       with:
         environment-url: ${{ env.ENVIRONMENT_URL }}
         app-id: ${{ env.CLIENT_ID }}
         client-secret: ${{ secrets.PowerPlatformSPN }}
         tenant-id: ${{ env.TENANT_ID }}
-        solution-name: ${{ github.event.inputs.solution_name }}
-        solution-output-file: ${{ github.event.inputs.solution_exported_folder }}/${{ github.event.inputs.solution_name }}.zip
 
-    - name: Export solution (managed)
+    - name: Export unmanaged solution
       uses: microsoft/powerplatform-actions/export-solution@v0
       with:
         environment-url: ${{ env.ENVIRONMENT_URL }}
@@ -55,30 +59,60 @@ jobs:
         client-secret: ${{ secrets.PowerPlatformSPN }}
         tenant-id: ${{ env.TENANT_ID }}
         solution-name: ${{ github.event.inputs.solution_name }}
-        managed: true
+        solution-output-file: ${{ github.event.inputs.solution_exported_folder }}/${{ github.event.inputs.solution_name }}_unmanaged.zip
+        solution-type: Unmanaged
+
+    - name: Export managed solution
+      uses: microsoft/powerplatform-actions/export-solution@v0
+      with:
+        environment-url: ${{ env.ENVIRONMENT_URL }}
+        app-id: ${{ env.CLIENT_ID }}
+        client-secret: ${{ secrets.PowerPlatformSPN }}
+        tenant-id: ${{ env.TENANT_ID }}
+        solution-name: ${{ github.event.inputs.solution_name }}
         solution-output-file: ${{ github.event.inputs.solution_exported_folder }}/${{ github.event.inputs.solution_name }}_managed.zip
+        solution-type: Managed
 
-    - name: Unpack solution
+    - name: Unpack unmanaged solution
       uses: microsoft/powerplatform-actions/unpack-solution@v0
       with:
-        solution-file: ${{ github.event.inputs.solution_exported_folder }}/${{ github.event.inputs.solution_name }}.zip
+        solution-file: ${{ github.event.inputs.solution_exported_folder }}/${{ github.event.inputs.solution_name }}_unmanaged.zip
         solution-folder: ${{ github.event.inputs.solution_folder }}/${{ github.event.inputs.solution_name }}
-        solution-type: 'Both'
+        solution-type: 'Unmanaged'
         overwrite-files: true
 
-    - name: Branch solution and prepare for Pull Request
-      uses: microsoft/powerplatform-actions/branch-solution@v0
-      with:
-        solution-folder: ${{ github.event.inputs.solution_folder }}/${{ github.event.inputs.solution_name }}
-        solution-target-folder: ${{ github.event.inputs.solution_target_folder }}/${{ github.event.inputs.solution_name }}
-        repo-token: ${{ secrets.PAT_TOKEN }}
-        allow-empty-commit: true
-
-    - name: Debug - List files
+    - name: Branch and commit unmanaged solution
       run: |
-        echo "Listing files in exported folder:"
-        ls ${{ github.event.inputs.solution_exported_folder }}
-        echo "Listing files in solution folder:"
-        ls ${{ github.event.inputs.solution_folder }}
-        echo "Listing files in target folder:"
-        ls ${{ github.event.inputs.solution_target_folder }}
+        git config --global user.name 'github-actions'
+        git config --global user.email 'github-actions@github.com'
+        git checkout -b add-unmanaged-solution-${{ github.event.inputs.solution_name }}
+        git add ${{ github.event.inputs.solution_folder }}/${{ github.event.inputs.solution_name }}
+        git commit -m "Add unmanaged solution ${{ github.event.inputs.solution_name }}"
+        git push origin add-unmanaged-solution-${{ github.event.inputs.solution_name }}
+
+    - name: Create pull request for unmanaged solution
+      uses: peter-evans/create-pull-request@v4
+      with:
+        token: ${{ secrets.PAT_TOKEN }}
+        branch: add-unmanaged-solution-${{ github.event.inputs.solution_name }}
+        base: main
+        title: "Add unmanaged solution ${{ github.event.inputs.solution_name }}"
+        body: "This PR adds the unmanaged solution ${{ github.event.inputs.solution_name }}"
+
+    - name: Branch and commit managed solution
+      run: |
+        git config --global user.name 'github-actions'
+        git config --global user.email 'github-actions@github.com'
+        git checkout -b add-managed-solution-${{ github.event.inputs.solution_name }}
+        git add ${{ github.event.inputs.solution_exported_folder }}/${{ github.event.inputs.solution_name }}_managed.zip
+        git commit -m "Add managed solution ${{ github.event.inputs.solution_name }}"
+        git push origin add-managed-solution-${{ github.event.inputs.solution_name }}
+
+    - name: Create pull request for managed solution
+      uses: peter-evans/create-pull-request@v4
+      with:
+        token: ${{ secrets.PAT_TOKEN }}
+        branch: add-managed-solution-${{ github.event.inputs.solution_name }}
+        base: main
+        title: "Add managed solution ${{ github.event.inputs.solution_name }}"
+        body: "This PR adds the managed solution ${{ github.event.inputs.solution_name }}"
