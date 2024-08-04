@@ -1,58 +1,60 @@
-name: release-solution-to-prod-reusable
+name: release-solution-to-UAT
+
 # Reusable workflow
-# convert solution to managed (using a build PowerPlatform environment for the conversion)
-# upload the solution to the GitHub artifacts and deploy to the PROD environment
+
+# Upload the solution to the GitHub artifacts and deploy to the PROD environment
+
 on:
-  workflow_call:
-    inputs: 
-      #Do Not change these values
-      #Values are set by the caller
-      #caller sample: release-action-call.ymnl
+  workflow_dispatch:
+    inputs:
+      # Do not change these values
+      # Values are set by the caller
       solution_name:
         description: 'The solution name.'
         type: string
-        default: ALMGitHUB       
+        default: ALMGitHUB
+        
       solution_shipping_folder:
-        description: 'folder name for staging the exported solution *do not change*'        
+        description: 'Folder name for staging the exported solution *do not change*'
         type: string
         default: out/ship/
+        
       solution_outbound_folder:
-        description: 'staging the unpacked solution folder before check-in *do not change*'
+        description: 'Staging the unpacked solution folder before check-in *do not change*'
         type: string
         default: out/solutions/
-      solution_source_folder: 
-       description: 'folder name to be created and checked in *do not change*'
-       type: string
-       default: solutions/
+        
+      solution_source_folder:
+        description: 'Folder name to be created and checked in *do not change*'
+        type: string
+        default: solutions/
+        
       solution_release_folder:
-       description: 'folder where the released binaries are going to be hosted *do not change*'
-       type: string
-       default: out/release
-      BUILD_ENVIRONMENT_URL:
-        description: 'Build environment url.'
+        description: 'Folder where the released binaries are going to be hosted *do not change*'
         type: string
-        required: true      
-      PRODUCTION_ENVIRONMENT_URL: 
-        description: 'Production environment url.'
+        default: out/release
+        
+      UAT_ENVIRONMENT_URL:
+        description: 'UAT environment URL.'
         type: string
         required: true
-      CLIENT_ID: 
-        description: 'The client id'
+        default: 'https://org5806c7ac.api.crm4.dynamics.com'
+        
+      CLIENT_ID:
+        description: 'The client ID'
         type: string
         required: true
-      TENANT_ID: 
-        description: 'The tenant id'
+        default: '1af267f9-3dd0-4cec-8f94-574a5ae46f4a'
+        
+      TENANT_ID:
+        description: 'The tenant ID'
         type: string
         required: true
-    secrets:
-      envSecret:
-        description: 'The secret value for authentication using SPN'
-        required: true
+        default: 'fd799da1-bfc1-4234-a91c-72b3a1cb9e26'
 
 jobs:
   convert-to-managed:
     runs-on: windows-latest
-    # or you can say runs-on: ubuntu-latest
     env:
       RUNNER_DEBUG: 1
 
@@ -64,40 +66,18 @@ jobs:
     - name: Pack solution
       uses: microsoft/powerplatform-actions/pack-solution@v0
       with:
-        solution-folder: ${{ inputs.solution_source_folder}}/${{ inputs.solution_name }}
-        solution-file: ${{ inputs.solution_outbound_folder}}/${{ inputs.solution_name }}.zip
-        solution-type: Unmanaged
+        solution-folder: ${{ inputs.solution_source_folder }}/{{ inputs.solution_name }}
+        solution-file: ${{ inputs.solution_outbound_folder }}/{{ inputs.solution_name }}_managed.zip
+        solution-type: Managed
 
-    - name: Import solution as unmanaged to build env
-      uses: microsoft/powerplatform-actions/import-solution@v0
-      with:
-        environment-url: ${{inputs.BUILD_ENVIRONMENT_URL}}
-        app-id: ${{inputs.CLIENT_ID}}
-        client-secret: ${{ secrets.envSecret }}
-        tenant-id: ${{inputs.TENANT_ID}}
-        solution-file: ${{ inputs.solution_outbound_folder}}/${{ inputs.solution_name }}.zip
-        force-overwrite: true
-        publish-changes: true
-
-    - name: Export solution as managed
-      uses: microsoft/powerplatform-actions/export-solution@v0
-      with:
-        environment-url: ${{inputs.BUILD_ENVIRONMENT_URL}}
-        app-id: ${{inputs.CLIENT_ID}}
-        client-secret: ${{ secrets.envSecret }} 
-        tenant-id: ${{inputs.TENANT_ID}}
-        solution-name: ${{ inputs.solution_name }}
-        managed: true
-        solution-output-file: ${{ inputs.solution_shipping_folder}}/${{ inputs.solution_name }}_managed.zip
-
-    - name: Upload the ready to ship solution to GH artifact store
+    - name: Upload the ready-to-ship solution to GH artifact store
       uses: actions/upload-artifact@v2
       with:
         name: managedSolutions
-        path: ${{ inputs.solution_shipping_folder}}/
+        path: ${{ inputs.solution_outbound_folder }}/{{ inputs.solution_name }}_managed.zip
 
   release-to-staging:
-    needs: [ convert-to-managed ]
+    needs: [convert-to-managed]
     runs-on: windows-latest
     env:
       RUNNER_DEBUG: 1
@@ -107,18 +87,19 @@ jobs:
       with:
         lfs: true
 
-    - name: Fetch the ready to ship solution from GH artifact store
+    - name: Fetch the ready-to-ship solution from GH artifact store
       uses: actions/download-artifact@v2
       with:
         name: managedSolutions
-        path: ${{ inputs.solution_release_folder}}
-    - name: Import solution to prod env
+        path: ${{ inputs.solution_release_folder }}
+
+    - name: Import solution to PROD env
       uses: microsoft/powerplatform-actions/import-solution@v0
       with:
-        environment-url: ${{inputs.PRODUCTION_ENVIRONMENT_URL}}
-        app-id: ${{inputs.CLIENT_ID}}
-        client-secret: ${{ secrets.envSecret }}
-        tenant-id: ${{inputs.TENANT_ID}}
-        solution-file: ${{ inputs.solution_release_folder}}/${{ inputs.solution_name }}_managed.zip
+        environment-url: ${{ inputs.PRODUCTION_ENVIRONMENT_URL }}
+        app-id: ${{ inputs.CLIENT_ID }}
+        client-secret: ${{ secrets.PowerPlatformSPN }}
+        tenant-id: ${{ inputs.TENANT_ID }}
+        solution-file: ${{ inputs.solution_release_folder }}/{{ inputs.solution_name }}_managed.zip
         force-overwrite: true
         publish-changes: true
