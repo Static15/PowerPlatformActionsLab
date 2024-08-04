@@ -29,7 +29,7 @@ on:
       solution_release_folder:
         description: 'Folder where the released binaries are going to be hosted *do not change*'
         type: string
-        default: out/release
+        default: out/release/
       BUILD_ENVIRONMENT_URL:
         description: 'Build environment URL.'
         type: string
@@ -64,11 +64,19 @@ jobs:
       with:
         lfs: true
 
+    - name: Unpack solution
+      uses: microsoft/powerplatform-actions/unpack-solution@v0
+      with:
+        solution-file: ${{ inputs.solution_shipping_folder }}${{ inputs.solution_name }}.zip
+        solution-folder: ${{ inputs.solution_source_folder }}${{ inputs.solution_name }}
+        solution-type: 'Both'
+        overwrite-files: true
+
     - name: Pack solution
       uses: microsoft/powerplatform-actions/pack-solution@v0
       with:
-        solution-folder: ${{ inputs.solution_source_folder }}/{{ inputs.solution_name }}
-        solution-file: ${{ inputs.solution_outbound_folder }}/{{ inputs.solution_name }}_managed.zip
+        solution-folder: ${{ inputs.solution_source_folder }}${{ inputs.solution_name }}
+        solution-file: ${{ inputs.solution_outbound_folder }}${{ inputs.solution_name }}_managed.zip
         solution-type: Managed
 
     - name: Import solution as managed to build environment
@@ -78,7 +86,7 @@ jobs:
         app-id: ${{ inputs.CLIENT_ID }}
         client-secret: ${{ secrets.envSecret }}
         tenant-id: ${{ inputs.TENANT_ID }}
-        solution-file: ${{ inputs.solution_outbound_folder }}/{{ inputs.solution_name }}.zip
+        solution-file: ${{ inputs.solution_outbound_folder }}${{ inputs.solution_name }}_managed.zip
         force-overwrite: true
         publish-changes: true
 
@@ -86,7 +94,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: managedSolutions
-        path: ${{ inputs.solution_outbound_folder }}/
+        path: ${{ inputs.solution_outbound_folder }}
 
   release-to-staging:
     needs: convert-to-managed
@@ -113,6 +121,6 @@ jobs:
         app-id: ${{ inputs.CLIENT_ID }}
         client-secret: ${{ secrets.envSecret }}
         tenant-id: ${{ inputs.TENANT_ID }}
-        solution-file: ${{ inputs.solution_release_folder }}/{{ inputs.solution_name }}_managed.zip
+        solution-file: ${{ inputs.solution_release_folder }}${{ inputs.solution_name }}_managed.zip
         force-overwrite: true
         publish-changes: true
