@@ -7,7 +7,7 @@ on:
       - published
 
 env:
-  ENVIRONMENT_URL_UAT: 'https://org5806c7ac.api.crm4.dynamics.com'
+  ENVIRONMENT_URL_UAT: 'https://org3d5cdde.api.crm4.dynamics.com'
   CLIENT_ID: '1af267f9-3dd0-4cec-8f94-574a5ae46f4a'
   TENANT_ID: 'fd799da1-bfc1-4234-a91c-72b3a1cb9e26'
 
@@ -17,7 +17,6 @@ permissions:
 jobs:
   import-to-uat:
     runs-on: windows-latest
-    # or you can say runs-on: ubuntu-latest
     env:
       RUNNER_DEBUG: 1
 
