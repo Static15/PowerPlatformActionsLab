@@ -1,11 +1,11 @@
-name: release-solution-to-UAT
+name: release-solution-to-prod-reusable
 
 # Reusable workflow
 
 # Upload the solution to the GitHub artifacts and deploy to the PROD environment
 
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
       # Do not change these values
       # Values are set by the caller
