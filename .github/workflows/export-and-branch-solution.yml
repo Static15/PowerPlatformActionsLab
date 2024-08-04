@@ -7,29 +7,32 @@ on:
     inputs:
       # Change this value
       solution_name:
-        description: 'name of the solution to worked on from Power Platform'
+        description: 'Name of the solution to work on from Power Platform'
         required: true
         default: ALMGitHUB
-       # Do Not change these values
+      # Do Not change these values
       solution_exported_folder:
-        description: 'folder name for staging the exported solution *do not change*'
+        description: 'Folder name for staging the exported solution *do not change*'
         required: true
         default: out/exported/
       solution_folder:
-        description: 'staging the unpacked solution folder before check-in *do not change*'
+        description: 'Folder for staging the unpacked solution before check-in *do not change*'
         required: true
         default: out/solutions/
-      solution_target_folder: 
-        description: 'folder name to be created and checked in *do not change*'
+      solution_target_folder:
+        description: 'Folder name to be created and checked in *do not change*'
         required: true
         default: solutions/
+
 env:
-  # edit your values here
+  # Edit your values here
   ENVIRONMENT_URL: 'https://org31cddccd.api.crm4.dynamics.com'
   CLIENT_ID: '1af267f9-3dd0-4cec-8f94-574a5ae46f4a'
   TENANT_ID: 'fd799da1-bfc1-4234-a91c-72b3a1cb9e26'
+
 permissions:
   contents: write
+
 jobs:
   export-from-dev:
     runs-on: windows-latest
