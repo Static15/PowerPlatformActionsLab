@@ -76,6 +76,7 @@ jobs:
       with:
         solution-file: ${{ github.event.inputs.solution_exported_folder }}/Unmanaged/${{ github.event.inputs.solution_name }}.zip
         solution-folder: ${{ github.event.inputs.solution_folder }}/Unmanaged/${{ github.event.inputs.solution_name }}
+        packagetype: 'Unmanaged'
         overwrite-files: true
 
     - name: unpack-solution action - managed
@@ -83,6 +84,7 @@ jobs:
       with:
         solution-file: ${{ github.event.inputs.solution_exported_folder }}/Managed/${{ github.event.inputs.solution_name }}_managed.zip
         solution-folder: ${{ github.event.inputs.solution_folder }}/Managed/${{ github.event.inputs.solution_name }}
+        packagetype: 'Managed'
         overwrite-files: true
 
     - name: branch-solution, prepare it for a PullRequest - unmanaged
