@@ -77,6 +77,18 @@ jobs:
         solution-name: ${{ github.event.inputs.solution_name }}
         solution-output-file: ${{ github.event.inputs.solution_exported_folder }}/${{ github.event.inputs.solution_name }}-managed.zip
 
+    - name: remove existing unmanaged solution directory
+      run: |
+        if [ -d "${{ github.event.inputs.solution_folder }}/${{ github.event.inputs.solution_name }}-unmanaged" ]; then
+          rm -rf "${{ github.event.inputs.solution_folder }}/${{ github.event.inputs.solution_name }}-unmanaged"
+        fi
+
+    - name: remove existing managed solution directory
+      run: |
+        if [ -d "${{ github.event.inputs.solution_folder }}/${{ github.event.inputs.solution_name }}-managed" ]; then
+          rm -rf "${{ github.event.inputs.solution_folder }}/${{ github.event.inputs.solution_name }}-managed"
+        fi
+
     - name: unpack unmanaged solution
       uses: microsoft/powerplatform-actions/unpack-solution@v0
       with:
