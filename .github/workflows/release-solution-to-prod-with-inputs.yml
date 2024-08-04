@@ -12,7 +12,7 @@ on:
       solution_name:
         description: 'The solution name.'
         type: string
-        default: '<SolutionName>'
+        default: ALMGitHUB
         
       solution_shipping_folder:
         description: 'Folder name for staging the exported solution *do not change*'
@@ -38,19 +38,19 @@ on:
         description: 'Production environment URL.'
         type: string
         required: true
-        default: '<Production Environment URL>'
+        default: 'https://org5806c7ac.api.crm4.dynamics.com'
         
       CLIENT_ID:
         description: 'The client ID'
         type: string
         required: true
-        default: '<ClientID>'
+        default: '1af267f9-3dd0-4cec-8f94-574a5ae46f4a'
         
       TENANT_ID:
         description: 'The tenant ID'
         type: string
         required: true
-        default: '<TenantID>'
+        default: 'fd799da1-bfc1-4234-a91c-72b3a1cb9e26'
 
 jobs:
   convert-to-managed:
