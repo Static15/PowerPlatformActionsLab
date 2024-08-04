@@ -1,18 +1,18 @@
-name: release-solution-to-prod-reusable
+name: release-solution-to-prod
 
 # Reusable workflow
 
 # Upload the solution to the GitHub artifacts and deploy to the PROD environment
 
 on:
-   workflow_dispatch:
+  workflow_dispatch:
     inputs:
       # Do not change these values
       # Values are set by the caller
       solution_name:
         description: 'The solution name.'
         type: string
-        default: ALMGitHUB
+        default: '<SolutionName>'
         
       solution_shipping_folder:
         description: 'Folder name for staging the exported solution *do not change*'
@@ -34,23 +34,23 @@ on:
         type: string
         default: out/release
         
-      UAT_ENVIRONMENT_URL:
-        description: 'UAT environment URL.'
+      PRODUCTION_ENVIRONMENT_URL:
+        description: 'Production environment URL.'
         type: string
         required: true
-        default: 'https://org5806c7ac.api.crm4.dynamics.com'
+        default: '<Production Environment URL>'
         
       CLIENT_ID:
         description: 'The client ID'
         type: string
         required: true
-        default: '1af267f9-3dd0-4cec-8f94-574a5ae46f4a'
+        default: '<ClientID>'
         
       TENANT_ID:
         description: 'The tenant ID'
         type: string
         required: true
-        default: 'fd799da1-bfc1-4234-a91c-72b3a1cb9e26'
+        default: '<TenantID>'
 
 jobs:
   convert-to-managed:
@@ -66,15 +66,15 @@ jobs:
     - name: Pack solution
       uses: microsoft/powerplatform-actions/pack-solution@v0
       with:
-        solution-folder: ${{ inputs.solution_source_folder }}/{{ inputs.solution_name }}
-        solution-file: ${{ inputs.solution_outbound_folder }}/{{ inputs.solution_name }}_managed.zip
+        solution-folder: ${{ inputs.solution_source_folder }}/${{ inputs.solution_name }}
+        solution-file: ${{ inputs.solution_outbound_folder }}/${{ inputs.solution_name }}_managed.zip
         solution-type: Managed
 
     - name: Upload the ready-to-ship solution to GH artifact store
       uses: actions/upload-artifact@v2
       with:
         name: managedSolutions
-        path: ${{ inputs.solution_outbound_folder }}/{{ inputs.solution_name }}_managed.zip
+        path: ${{ inputs.solution_outbound_folder }}/${{ inputs.solution_name }}_managed.zip
 
   release-to-staging:
     needs: [convert-to-managed]
@@ -100,6 +100,6 @@ jobs:
         app-id: ${{ inputs.CLIENT_ID }}
         client-secret: ${{ secrets.PowerPlatformSPN }}
         tenant-id: ${{ inputs.TENANT_ID }}
-        solution-file: ${{ inputs.solution_release_folder }}/{{ inputs.solution_name }}_managed.zip
+        solution-file: ${{ inputs.solution_release_folder }}/${{ inputs.solution_name }}_managed.zip
         force-overwrite: true
         publish-changes: true
