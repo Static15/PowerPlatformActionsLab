@@ -2,7 +2,7 @@ name: release-solution-to-UAT
 
 # Reusable workflow
 
-# Upload the solution to the GitHub artifacts and deploy to the PROD environment
+# Upload the solution to the GitHub artifacts and deploy to the UAT environment
 
 on:
   workflow_dispatch:
@@ -34,8 +34,8 @@ on:
         type: string
         default: out/release
         
-      PRODUCTION_ENVIRONMENT_URL:
-        description: 'Production environment URL.'
+      UAT_ENVIRONMENT_URL:
+        description: 'UAT environment URL.'
         type: string
         required: true
         default: 'https://org5806c7ac.api.crm4.dynamics.com'
@@ -93,10 +93,10 @@ jobs:
         name: managedSolutions
         path: ${{ inputs.solution_release_folder }}
 
-    - name: Import solution to PROD env
+    - name: Import solution to UAT env
       uses: microsoft/powerplatform-actions/import-solution@v0
       with:
-        environment-url: ${{ inputs.PRODUCTION_ENVIRONMENT_URL }}
+        environment-url: ${{ inputs.UAT_ENVIRONMENT_URL }}
         app-id: ${{ inputs.CLIENT_ID }}
         client-secret: ${{ secrets.PowerPlatformSPN }}
         tenant-id: ${{ inputs.TENANT_ID }}
